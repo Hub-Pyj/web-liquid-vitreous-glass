@@ -1,7 +1,7 @@
 /*!
- * Vitreous Glass v1.3.0
+ * Web Liquid Vitreous Glass v1.5.0
  * Real-refraction "liquid glass" for the web — one file, no dependencies, no build step.
- * MIT License · Copyright (c) 2026 Vitreous Glass Authors
+ * MIT License · Copyright (c) 2026 Web Liquid Vitreous Glass Authors
  *
  * How it works (this library's own approach):
  *   1. An element is treated as a lens slab with a rounded-rect boundary.
@@ -32,7 +32,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  var VERSION = '1.4.0';
+  var VERSION = '1.5.0';
   var SVG_NS = 'http://www.w3.org/2000/svg';
 
   var DEFAULTS = {
@@ -337,7 +337,7 @@
       '[data-vitreous]::after{content:"";position:absolute;inset:0;border-radius:inherit;',
       'pointer-events:none;box-shadow:var(--vitreous-rim,none);}',
       '[data-vitreous][data-vitreous-rim="off"]::after{display:none;}',
-      'vitreous-glass{display:block;box-sizing:border-box;}'
+      'web-liquid-vitreous-glass,vitreous-glass{display:block;box-sizing:border-box;}'
     ].join('');
     var tag = document.createElement('style');
     tag.setAttribute('data-vitreous-style', '');
@@ -631,10 +631,10 @@
     return out;
   }
 
-  function define(tagName) {
-    var name = tagName || 'vitreous-glass';
-    if (typeof customElements === 'undefined' || customElements.get(name)) return false;
+  var LEGACY_TAG = 'vitreous-glass';
 
+  // 每个标签名必须拥有各自的构造函数：同一个构造函数不能在注册表里注册两次。
+  function makeClass() {
     var Klass = function () {
       var self = Reflect.construct(HTMLElement, [], Klass);
       self._api = null;
@@ -657,7 +657,23 @@
       this._api.update(readAttrs(this));
     };
 
-    customElements.define(name, Klass);
+    return Klass;
+  }
+
+  function registerTag(name) {
+    if (customElements.get(name)) return false;
+    try { customElements.define(name, makeClass()); } catch (e) { return false; }
+    return true;
+  }
+
+  function define(tagName) {
+    if (typeof customElements === 'undefined') return false;
+    var name = tagName || 'web-liquid-vitreous-glass';
+    if (customElements.get(name)) return false;
+
+    registerTag(name);
+    // 兼容旧标签：更名前的 <vitreous-glass> 仍可用，行为与新标签完全一致
+    if (name !== LEGACY_TAG) registerTag(LEGACY_TAG);
     return true;
   }
 

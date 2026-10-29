@@ -1,8 +1,9 @@
-# Vitreous Glass
+# Web Liquid Vitreous Glass
 
+**若此版本不可用请退回至1.4.0 当前版本1.5.0**
 液态玻璃JavaScript库：单文件、零依赖、无需构建，真实地**弯折**元素背后的内容，而不是只做一层模糊。
 
-MIT License · v1.4.0
+MIT License · v1.5.0
 
 ```
 web-liquid-vitreous-glass/
@@ -63,10 +64,10 @@ Vitreous 的做法：
 <script src="./vitreous.js"></script>
 <script>Vitreous.define();</script>
 
-<vitreous-glass edge="30" bend="18" lobe="0.25" chroma="1.4"
+<web-liquid-vitreous-glass edge="30" bend="18" lobe="0.25" chroma="1.4"
                 style="width:300px;height:160px;border-radius:24px">
   内容
-</vitreous-glass>
+</web-liquid-vitreous-glass>
 ```
 
 或者用 JS：
@@ -137,7 +138,7 @@ Vitreous.apply(el, { bend: 20 });
 
 ```html
 <div class="vg-panel" id="panel">
-  <h3>Vitreous Glass</h3>
+  <h3>Web Liquid Vitreous Glass</h3>
   <p>按住任意处拖动</p>
 </div>
 ```
@@ -474,7 +475,7 @@ Vitreous.watch(document.body, '.vg-panel', { bend: 20 });
 | `Vitreous.scan(root, selector, options)` | 批量处理，默认 `[data-vitreous]`。 |
 | `Vitreous.watch(root, selector, options)` | 监听 DOM 变化，新插入的玻璃自动生效。 |
 | `Vitreous.remove(el)` | 移除玻璃并还原样式。 |
-| `Vitreous.define(tag)` | 注册自定义元素，默认 `vitreous-glass`。 |
+| `Vitreous.define(tag)` | 注册自定义元素，默认 `web-liquid-vitreous-glass`（旧标签 `vitreous-glass` 自动兼容注册）。 |
 | `Vitreous.supported()` | 当前环境是否会真的折射。 |
 | `Vitreous.force(bool)` | 强制开启/关闭折射，`null` 恢复自动判断。常用于做「开/关对比」。 |
 | `Vitreous.map(el)` | 取当前元素生成的位移贴图（data URL），便于调试。 |
@@ -546,6 +547,17 @@ Vitreous.watch(document.body, '.vg-panel', { bend: 20 });
 ---
 
 ## 7. 更新日志
+
+### v1.5.0 (2026-10-29)
+
+本次**只改名称与版本号，功能代码无任何改动**。
+
+**改名**
+
+- 项目名称由 `Vitreous Glass` 统一更名为 **Web Liquid Vitreous Glass**：README 标题与示例、演示页卡片标题及底部标识、`vitreous.js` 文件头与版权行、`LICENSE` 版权行全部同步更新。
+- 包目录名与默认自定义元素标签由 `vitreous-glass` 改为 `web-liquid-vitreous-glass`。
+- 为避免已按旧版接入的页面失效，`vitreous.js` 在注册新标签的同时，仍会注册旧的 `<vitreous-glass>` 作为兼容别名，两套标签行为完全一致。
+- `VERSION` 常量同步为 `1.5.0`。
 
 ### v1.4.0 (2026-10-29)
 
