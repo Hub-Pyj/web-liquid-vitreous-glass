@@ -49,7 +49,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#0a0918;font-family:ui
 #win{position:absolute;left:9vw;top:50%;transform:translateY(-50%);width:min(336px,86vw);border-radius:28px;
   padding:20px 20px 22px;color:#fff;cursor:grab;user-select:none;touch-action:none;box-sizing:border-box;
   background:rgba(255,255,255,.10);
-  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(255,255,255,.16),
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16),inset 0 -1px 0 rgba(255,255,255,.16),
     inset 0 0 0 1px rgba(255,255,255,.32),0 22px 55px rgba(0,0,0,.45)}
 #win.grab{cursor:grabbing}
 /* 内层模糊层：嵌套 backdrop-filter 会在 Chromium 里叠加到父级的位移结果上，
@@ -83,7 +83,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#0a0918;font-family:ui
 #chip{position:absolute;right:8vw;top:50%;transform:translateY(-50%);padding:14px 26px;border-radius:999px;
   color:#fff;font-size:13.5px;font-weight:500;cursor:pointer;box-sizing:border-box;
   background:rgba(255,255,255,.13);isolation:isolate;
-  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6),inset 0 -1px 0 rgba(255,255,255,.18),
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(255,255,255,.18),
     inset 0 0 0 1px rgba(255,255,255,.36),0 18px 40px rgba(0,0,0,.4);
   text-shadow:0 1px 3px rgba(0,0,0,.55);
   /* 回弹曲线：按下快、回弹带一点过冲，像手指压过一片软胶 */
@@ -91,11 +91,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:#0a0918;font-family:ui
              box-shadow .26s ease, background-color .26s ease;
   -webkit-tap-highlight-color:transparent}
 #chip:hover{transform:translateY(-50%) scale(1.035);
-  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.72),inset 0 -1px 0 rgba(255,255,255,.2),
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2),inset 0 -1px 0 rgba(255,255,255,.2),
     inset 0 0 0 1px rgba(255,255,255,.45),0 22px 48px rgba(0,0,0,.46)}
 /* 按下：整体缩一下并压暗，影子收紧，做出“被压进去”的体积感 */
 #chip:active,#chip.press{transform:translateY(-50%) scale(.955);
-  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.5),inset 0 -1px 0 rgba(255,255,255,.12),
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -1px 0 rgba(255,255,255,.12),
     inset 0 0 0 1px rgba(255,255,255,.3),0 8px 20px rgba(0,0,0,.34)}
 /* 内层墨水池：只裁水波，不影响向外扩散的光晕 */
 #chip .ink{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none}

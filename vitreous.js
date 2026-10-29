@@ -32,7 +32,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  var VERSION = '1.3.0';
+  var VERSION = '1.4.0';
   var SVG_NS = 'http://www.w3.org/2000/svg';
 
   var DEFAULTS = {
@@ -362,7 +362,8 @@
       el.style.backgroundImage = 'none';
     }
     if (o.rim > 0) {
-      var a = Math.min(1, 0.55 * o.rim);
+      /* 上下边光取同一强度，避免顶部单独多出一条白线 */
+      var a = Math.min(1, 0.14 * o.rim);
       var b = Math.min(1, 0.14 * o.rim);
       var c = Math.min(1, 0.26 * o.rim);
       el.style.setProperty('--vitreous-rim',

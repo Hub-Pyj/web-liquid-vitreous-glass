@@ -2,7 +2,7 @@
 
 液态玻璃JavaScript库：单文件、零依赖、无需构建，真实地**弯折**元素背后的内容，而不是只做一层模糊。
 
-MIT License · v1.3.0
+MIT License · v1.4.0
 
 ```
 web-liquid-vitreous-glass/
@@ -158,7 +158,7 @@ Vitreous.apply(el, { bend: 20 });
 
   /* 边光 + 投影，这几层是「像玻璃」的关键，别省 */
   box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, .55),
+    inset 0 1px 0 rgba(255, 255, 255, .16),
     inset 0 -1px 0 rgba(255, 255, 255, .16),
     inset 0 0 0 1px rgba(255, 255, 255, .32),
     0 22px 55px rgba(0, 0, 0, .45);
@@ -253,7 +253,7 @@ new ResizeObserver(() => ctrl.refresh()).observe(panel);
   -webkit-tap-highlight-color: transparent;
 
   box-shadow:
-    inset 0 1.5px 0 rgba(255, 255, 255, .6),
+    inset 0 1px 0 rgba(255, 255, 255, .18),
     inset 0 -1px 0 rgba(255, 255, 255, .18),
     inset 0 0 0 1px rgba(255, 255, 255, .36),
     0 16px 36px rgba(0, 0, 0, .38);
@@ -546,6 +546,16 @@ Vitreous.watch(document.body, '.vg-panel', { bend: 20 });
 ---
 
 ## 7. 更新日志
+
+### v1.4.0 (2026-10-29)
+
+**修复**
+
+- **控件顶部多出一条白边**：控件的边光原来用的是不对称写法——顶部 `inset 0 1.5px 0 rgba(255,255,255,.55~.6)`，底部只有 `inset 0 -1px 0 rgba(255,255,255,.16~.18)`。于是卡片与胶囊按钮的顶边是一条又亮又粗的白线，底边几乎没有，上下明显失衡。
+- 现在顶部与底部统一为 `inset 0 1px 0` + 同一透明度（卡片 `.16`、按钮 `.18`，hover `.2`、按下 `.12`），边光上下对称，顶部不再有独立亮线。
+- `vitreous.js` 里运行时生成的边光变量 `--vitreous-rim` 同步修正：顶部系数原本是底部的近 4 倍（`0.55` vs `0.14`），现统一为 `0.14`，注入的 `<vitreous-glass>` 元素与小控件同样不会顶边发亮。
+- `README` 3.2 / 3.3 两段示例 CSS 一并改为对称写法，复制即可得到修正后的效果。
+- 无 API 变更，`VERSION` 常量同步为 `1.4.0`。
 
 ### v1.3.0 (2026-10-29)
 
