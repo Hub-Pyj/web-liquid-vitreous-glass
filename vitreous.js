@@ -1,5 +1,5 @@
 /*!
- * Vitreous Glass v1.0.0
+ * Vitreous Glass v1.1.0
  * Real-refraction "liquid glass" for the web — one file, no dependencies, no build step.
  * MIT License · Copyright (c) 2026 Vitreous Glass Authors
  *
@@ -32,7 +32,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
   var SVG_NS = 'http://www.w3.org/2000/svg';
 
   var DEFAULTS = {

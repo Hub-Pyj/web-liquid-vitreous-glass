@@ -3,7 +3,7 @@
 <style>
 html,body{margin:0;height:100%;overflow:hidden;background:#0a0918;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI","PingFang SC",sans-serif}
 #bg{position:fixed;inset:0;overflow:hidden;background:#080714}
-/* 浮动彩球背景。
+/* 浮动彩球背景
    用 mix-blend-mode:screen 让交叠处自然提亮，边缘靠 blur 化开，不出现硬边。
    玻璃卡片会把这些色球折射出厚边，比条纹更能看出透镜的弯曲。 */
 .blob{position:absolute;border-radius:50%;filter:none;mix-blend-mode:screen;
@@ -57,7 +57,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#0a0918;font-family:ui
    放在 z-index:-1 就不会盖住文字，父级有 transform 形成独立堆叠上下文。 */
 #win::before,#chip::before{content:"";position:absolute;inset:0;border-radius:inherit;
   -webkit-backdrop-filter:blur(var(--blur,30px));
-  backdrop-filter:blur(var(--blur,0px));pointer-events:none;z-index:-1}
+  backdrop-filter:blur(var(--blur,30px));pointer-events:none;z-index:-1}
 #win h3{margin:0 0 6px;font-size:15px;font-weight:500;letter-spacing:.2px;
   text-shadow:0 1px 2px rgba(0,0,0,.9),0 0 14px rgba(0,0,0,.55)}
 #win p{margin:0;font-size:11.5px;opacity:.92;
@@ -82,10 +82,42 @@ html,body{margin:0;height:100%;overflow:hidden;background:#0a0918;font-family:ui
   background:linear-gradient(180deg,#fff8e0,#ffd36b);box-shadow:0 1px 3px rgba(0,0,0,.45)}
 #chip{position:absolute;right:8vw;top:50%;transform:translateY(-50%);padding:14px 26px;border-radius:999px;
   color:#fff;font-size:13.5px;font-weight:500;cursor:pointer;box-sizing:border-box;
-  background:rgba(255,255,255,.13);
+  background:rgba(255,255,255,.13);isolation:isolate;
   box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6),inset 0 -1px 0 rgba(255,255,255,.18),
     inset 0 0 0 1px rgba(255,255,255,.36),0 18px 40px rgba(0,0,0,.4);
-  text-shadow:0 1px 3px rgba(0,0,0,.55)}
+  text-shadow:0 1px 3px rgba(0,0,0,.55);
+  /* 回弹曲线：按下快、回弹带一点过冲，像手指压过一片软胶 */
+  transition:transform .26s cubic-bezier(.34,1.56,.64,1),
+             box-shadow .26s ease, background-color .26s ease;
+  -webkit-tap-highlight-color:transparent}
+#chip:hover{transform:translateY(-50%) scale(1.035);
+  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.72),inset 0 -1px 0 rgba(255,255,255,.2),
+    inset 0 0 0 1px rgba(255,255,255,.45),0 22px 48px rgba(0,0,0,.46)}
+/* 按下：整体缩一下并压暗，影子收紧，做出“被压进去”的体积感 */
+#chip:active,#chip.press{transform:translateY(-50%) scale(.955);
+  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.5),inset 0 -1px 0 rgba(255,255,255,.12),
+    inset 0 0 0 1px rgba(255,255,255,.3),0 8px 20px rgba(0,0,0,.34)}
+/* 内层墨水池：只裁水波，不影响向外扩散的光晕 */
+#chip .ink{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none}
+/* 水波：从点击点扩散的亮斑 */
+#chip .ripple{position:absolute;left:0;top:0;width:10px;height:10px;border-radius:50%;
+  pointer-events:none;background:radial-gradient(circle,rgba(255,255,255,.85),rgba(255,255,255,.25) 45%,rgba(255,255,255,0) 72%);
+  transform:translate(-50%,-50%) scale(0);opacity:.95;animation:rippleGo .62s cubic-bezier(.22,.61,.36,1) forwards}
+@keyframes rippleGo{
+  0%{transform:translate(-50%,-50%) scale(0);opacity:.95}
+  70%{opacity:.45}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
+/* 外圈脉冲：点击后一圈光晕向外散开，强化“点到了”的反馈 */
+#chip .pulse{position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:0 0 0 0 rgba(255,255,255,.55);animation:pulseGo .6s ease-out forwards}
+@keyframes pulseGo{
+  0%{box-shadow:0 0 0 0 rgba(255,255,255,.5)}
+  100%{box-shadow:0 0 0 14px rgba(255,255,255,0)}}
+#chip .lbl{position:relative;z-index:2}
+/* 点击瞬间给文字一点挤压，配合整体缩放 */
+#chip.press .lbl{animation:labelPop .26s ease-out}
+@keyframes labelPop{
+  0%{transform:scale(1)}40%{transform:scale(.94)}100%{transform:scale(1)}}
 #tag{position:absolute;left:9vw;bottom:3.4vh;font-size:10.5px;color:rgba(255,255,255,.6);letter-spacing:.2px}
 #dbg{position:absolute;right:8vw;bottom:3.4vh;font-size:10px;line-height:1.5;color:rgba(255,255,255,.55);
   font-family:ui-monospace,Menlo,monospace;max-width:44vw;white-space:pre-wrap}
@@ -107,8 +139,8 @@ html,body{margin:0;height:100%;overflow:hidden;background:#0a0918;font-family:ui
 <div id="win">
 <h3>Vitreous Glass</h3>
 <p>按住卡片任意处拖动 · 看边缘如何弯折背景</p>
-<div class="row"><span>弯折强度</span><b id="bV">15</b></div>
-<input id="bend" type="range" min="0" max="50" step="1" value="15">
+<div class="row"><span>弯折强度</span><b id="bV">20</b></div>
+<input id="bend" type="range" min="0" max="50" step="1" value="20">
 <div class="row"><span>色散强度</span><b id="cV">1.0</b></div>
 <input id="chroma" type="range" min="0" max="50" step="1" value="10">
 <div class="row"><span>旋涡回流</span><b id="lV">6.5</b></div>
@@ -120,7 +152,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#0a0918;font-family:ui
 <div class="row"><span>透光度</span><b id="oV">0.00</b></div>
 <input id="alpha" type="range" min="0" max="40" step="1" value="0">
 </div>
-<div id="chip">Subscribe</div>
+<div id="chip" role="button" tabindex="0" aria-label="Subscribe"><span class="ink"></span><span class="lbl">Subscribe</span></div>
 <div id="tag">Vitreous Glass · MIT · SDF 距离场 + SVG feDisplacementMap</div>
 <div id="dbg">初始化…</div>
 <script>
@@ -204,8 +236,17 @@ function glass(el,rad){
   var r=el.getBoundingClientRect();
   var w=Math.round(r.width),h=Math.round(r.height);
   if(!w||!h){log('尺寸为0，跳过');return;}
+  // rad<0 表示胶囊：半径取高度一半。原来写死 999 会算出无效的圆角距离
+  if(rad<0)rad=Math.round(Math.min(w,h)/2);
   try{
     var o={bend:+bEl.value,lobe:+lEl.value/100,chroma:+cEl.value/10,edge:+eEl.value};
+    // 弯折带不能超过控件一半短边，否则整个控件都落在弯折带里：
+    // 没有平坦的中部，背景被一路掰到底，按钮上会出现一团月牙状的破口。
+    // 于是同一个边缘带宽，大卡片照旧，小按钮自动收窄。
+    var half=Math.min(w,h)/2;
+    // 系数取 0.55：留出足够宽的平坦中部，否则小按钮会被整块掰弯，
+    // 折射带在内部拼成一条硬边亮条，看起来像贴了张塑料膜而不是玻璃。
+    if(o.edge>half*0.55)o.edge=Math.max(3,Math.round(half*0.55));
     var url=map(w,h,rad,o);
     var id='vg'+(++seq);
     var f=document.createElementNS(NS,'filter');
@@ -229,7 +270,7 @@ function glass(el,rad){
   }
 }
 
-function paint(){ glass(win,28); glass(chip,999); }
+function paint(){ glass(win,28); glass(chip,-1); }
 
 var drag=null;
 win.addEventListener('pointerdown',function(e){
@@ -271,6 +312,34 @@ function sync(){
   el.addEventListener('input',function(){ sync(); paint(); });
 });
 sync();
+// ---- Subscribe 按钮点击动效 ----
+var ink=chip.querySelector('.ink');
+function burst(x,y){
+  var d=Math.max(chip.offsetWidth,chip.offsetHeight)*2.2;
+  var rp=document.createElement('span');
+  rp.className='ripple';
+  rp.style.width=d+'px';rp.style.height=d+'px';
+  rp.style.left=x+'px';rp.style.top=y+'px';
+  ink.appendChild(rp);
+  rp.addEventListener('animationend',function(){if(rp.parentNode)rp.parentNode.removeChild(rp);});
+  var pl=document.createElement('span');
+  pl.className='pulse';
+  chip.appendChild(pl);
+  pl.addEventListener('animationend',function(){if(pl.parentNode)pl.parentNode.removeChild(pl);});
+  chip.classList.add('press');
+  setTimeout(function(){chip.classList.remove('press');},190);
+}
+chip.addEventListener('pointerdown',function(e){
+  var r=chip.getBoundingClientRect();
+  burst(e.clientX-r.left,e.clientY-r.top);
+});
+// 键盘可达：Enter / 空格也能触发同一套动效
+chip.addEventListener('keydown',function(e){
+  if(e.key==='Enter'||e.key===' '){
+    e.preventDefault();
+    burst(chip.offsetWidth/2,chip.offsetHeight/2);
+  }
+});
 window.addEventListener('resize',function(){setTimeout(paint,200);});
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(paint);
 requestAnimationFrame(paint);
