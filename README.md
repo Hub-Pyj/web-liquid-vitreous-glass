@@ -1,2 +1,173 @@
-# web-liquid-vitreous-glass
-单文件、零依赖、无需构建的液态玻璃JavaScript库。用 SDF 距离场生成位移贴图，配合 SVG feDisplacementMap 真实弯折元素背后的画面，让边缘像透镜一样折射内容，而不是只做一层模糊。仅 Chromium 支持真弯折，其余环境自动降级为磨砂玻璃。
+# Vitreous Glass
+
+液态玻璃JavaScript库：单文件、零依赖、无需构建，真实地**弯折**元素背后的内容，而不是只做一层模糊。
+
+MIT License · v1.0.0
+
+```
+web-liquid-vitreous-glass/
+├── vitreous.js   # 库本体（一个文件，约 23KB 未压缩）
+├── demo.html     # 演示页：可拖动悬浮窗 + 参数面板
+├── README.md
+└── LICENSE
+```
+
+---
+
+## 1. 它做了什么
+
+大多数「玻璃拟态」只是 `backdrop-filter: blur()` —— 背景被模糊掉，但几何上是平的，看不出玻璃的厚度和边缘。真正的液态玻璃需要**边缘把背后的画面折射进来**：靠近边框的像素应该看到比它更靠外的内容，于是边框看起来像一圈透镜。
+
+Vitreous 的做法：
+
+1. 把元素看成一枚圆角矩形透镜。
+2. 对元素内每个像素计算它到边界的**有符号距离**，负值表示在内侧。
+3. 用自有剖面函数把「离边界多深」换算成「往哪个方向拉多少像素」：
+
+   ```
+   t  = depth / edge
+   p(t) = (1 - t)^(1 + curve)  -  lobe * sin(π t)
+   ```
+
+   第一项让边缘处拉扯最强、向内快速衰减；第二项是可选的**内层反向回流**，它让玻璃边缘出现一圈反向的微凸，也就是「旋涡」感的来源。`curve` 控制衰减陡峭程度，`lobe` 控制回流强度。
+
+4. 把二维位移向量编码进 PNG 的 R/G 通道（128 = 不偏移），用 `feImage` 拉伸到元素实际尺寸，再交给 `feDisplacementMap` 去弯折 `SourceGraphic`（对 `backdrop-filter` 来说，那就是元素背后的画面）。
+5. 色散由三遍位移完成：R、G、B 各用略微不同的位移强度跑一次，再从每遍里各取一个通道叠加，于是边缘自然出现红蓝色边——和真实玻璃的色散一致。
+
+位移贴图按尺寸分桶缓存，同一尺寸的玻璃只算一次。
+
+---
+
+## 2. 快速开始
+
+```html
+<script src="./vitreous.js"></script>
+
+<style>
+  .glass {
+    border-radius: 22px;
+    background: rgba(255,255,255,.1);   /* 库会接管底色，这行只是兜底 */
+  }
+</style>
+
+<div class="glass" data-vitreous>玻璃</div>
+
+<script>
+  Vitreous.scan();                       // 处理所有 [data-vitreous]
+</script>
+```
+
+或者用自定义元素：
+
+```html
+<script src="./vitreous.js"></script>
+<script>Vitreous.define();</script>
+
+<vitreous-glass edge="30" bend="18" lobe="0.25" chroma="1.4"
+                style="width:300px;height:160px;border-radius:24px">
+  内容
+</vitreous-glass>
+```
+
+或者用 JS：
+
+```js
+const ctrl = Vitreous.apply(el, { bend: 20, chroma: 1.6 });
+ctrl.update({ frost: 6 });   // 增量更新
+ctrl.destroy();
+```
+
+---
+
+## 3. API
+
+| 方法 | 说明 |
+| --- | --- |
+| `Vitreous.apply(el, options)` | 给元素上玻璃，返回控制器。重复调用是增量更新。 |
+| `Vitreous.scan(root, selector, options)` | 批量处理，默认 `[data-vitreous]`。 |
+| `Vitreous.watch(root, selector, options)` | 监听 DOM 变化，新插入的玻璃自动生效。 |
+| `Vitreous.remove(el)` | 移除玻璃并还原样式。 |
+| `Vitreous.define(tag)` | 注册自定义元素，默认 `vitreous-glass`。 |
+| `Vitreous.supported()` | 当前环境是否会真的折射。 |
+| `Vitreous.force(bool)` | 强制开启/关闭折射，`null` 恢复自动判断。常用于做「开/关对比」。 |
+| `Vitreous.map(el)` | 取当前元素生成的位移贴图（data URL），便于调试。 |
+
+控制器对象：
+
+```js
+{
+  update(patch),   // 增量合并参数并重建
+  refresh(),       // 尺寸/样式变了就重建
+  options(),       // 当前参数副本
+  geometry(),      // { width, height, radii }
+  refracting(),    // 这个元素当前是否真在折射
+  destroy()
+}
+```
+
+### 参数
+
+| 名称 | 默认 | 范围 | 作用 |
+| --- | --- | --- | --- |
+| `edge` | `26` | 0–200 | 折射带宽度（px）。越大，玻璃「厚度」看起来越宽 |
+| `bend` | `15` | 0–80 | 边缘最大拉扯量（px），即折射强度 |
+| `curve` | `1.5` | 0–4 | 剖面衰减指数，越大边缘越锐利 |
+| `lobe` | `0.22` | 0–0.9 | 内层反向回流强度，产生旋涡/双影 |
+| `frost` | `0` | 0–20 | 中间平整区域的模糊量（px） |
+| `chroma` | `1.2` | 0–8 | 色散宽度（px），R/B 通道分离量 |
+| `sat` | `1.08` | 0–3 | 背景饱和度补偿 |
+| `tint` | `rgba(255,255,255,0.10)` | — | 玻璃底色，建议保持半透明 |
+| `rim` | `0.45` | 0–2 | CSS 边光强度（高光描边） |
+| `light` | `-120` | ±360 | 光源角度（度），决定静止时高光方位 |
+| `sheen` | `0.55` | 0–1.5 | 跟随鼠标的高光强度 |
+| `press` | `0` | 0–1 | 按下时挤压回弹动画强度 |
+| `quality` | `1` | 0.2–1 | 位移贴图分辨率倍数，低配设备可下调 |
+
+---
+
+## 4. 浏览器支持与降级
+
+`backdrop-filter: url(#svg)` 这个组合目前只有 **Chromium 内核**会真正绘制（Chrome / Edge / Arc / Brave / Electron）。Safari 和 Firefox 接受语法但会丢弃滤镜，所以库内置了引擎判断：
+
+- **Chromium**：走 SVG 位移滤镜，真实折射 + 色散。
+- **其他**：自动降级为 `backdrop-filter: blur() saturate()` 的磨砂玻璃，视觉上依然成立，不会出现「什么都看不见」的空白。
+- 想验证降级效果，调 `Vitreous.force(false)`，演示页里就是那颗「折射：开/关」按钮。
+
+降级值写在 CSS 变量 `--vitreous-fb` 上，可以自己覆盖：
+
+```css
+.my-glass { --vitreous-fb: blur(18px) saturate(1.3); }
+```
+
+### 使用注意
+
+- 元素必须有**明确的尺寸**和 `border-radius`，库会读取 `offsetWidth/offsetHeight` 与四角圆角。圆角用 px 最准，百分比会按短边近似。
+- 玻璃需要有内容可弯折。纯色平铺背景上看不出折射，背景越热闹效果越好（渐变、图片、视频、文字、条纹）。
+- 库会给元素加 `data-vitreous` 属性并写入 `background-color` / `background-image`（sheen 高光）。如果你需要自己控制背景，把 `tint` 设为 `'transparent'`、`sheen` 设为 `0`。
+- 边光用 `::after` 伪元素实现，元素自身的 `::after` 会被占用；不需要时设 `rim: 0` 或加 `data-vitreous-rim="off"`。
+- 位移贴图按尺寸分桶缓存（最多 40 张），大量不同尺寸的玻璃会各自生成一张。
+
+---
+
+## 5. 设计取舍
+
+- **不做 WebGL。** 位移贴图 + SVG 滤镜完全走合成器，不需要额外渲染上下文，能和普通 DOM、滚动、`position: sticky` 共存，也不会和别的 canvas 抢 GPU。
+- **贴图按尺寸分桶。** 位移图只和「尺寸 + 圆角 + 剖面参数」有关，与内容无关，所以同一尺寸的玻璃可以共用一张图。分辨率按元素面积自动下调，避免大面板生成 4K 贴图。
+- **色散用三遍位移而不是后处理。** 这样色散宽度直接等于像素宽度，和 `bend` 解耦，调参更直观。
+- **降级优先。** 任何不支持的环境都退到磨砂玻璃，而不是留一个没样式的透明块。
+
+---
+
+## 6. 更新日志
+
+### v1.0.0 (2026-10-29)
+首个版本。单文件、零依赖的液态玻璃实现，SDF 圆角矩形距离场生成位移贴图，驱动 SVG `feDisplacementMap` 弯折 `backdrop-filter` 采样的背景；色散用三遍不同强度的位移各取一个通道合成。
+
+---
+
+
+## 7. 许可
+
+MIT。见 `LICENSE`。
+
+本库为独立实现：折射的**技术前提**（用 SDF 位移贴图驱动 `feDisplacementMap` 来弯折 `backdrop-filter` 的背景）是公开的图形学常识，此前的开源项目各自用不同方式实现过；本库的剖面函数、旋涡回流项、参数模型、API 设计、指针高光、挤压弹簧、缓存策略均为自行编写，未复制任何项目的源码或注释。
