@@ -3,7 +3,7 @@
 <style>
 html,body{margin:0;height:100%;overflow:hidden;background:#0a0918;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI","PingFang SC",sans-serif}
 #bg{position:fixed;inset:0;overflow:hidden;background:#080714}
-/* 浮动彩球背景
+/* 浮动彩球背景：几个大尺寸彩色光球在暗底上缓慢漂浮、呼吸。
    用 mix-blend-mode:screen 让交叠处自然提亮，边缘靠 blur 化开，不出现硬边。
    玻璃卡片会把这些色球折射出厚边，比条纹更能看出透镜的弯曲。 */
 .blob{position:absolute;border-radius:50%;filter:none;mix-blend-mode:screen;
@@ -45,7 +45,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#0a0918;font-family:ui
 /* 只压边缘，中心留亮，避免彩球被整体压灰 */
 .veil{position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(ellipse at 50% 50%,rgba(8,7,20,0) 40%,rgba(8,7,20,.38) 100%)}
-/* 兜底底色 */
+/* 兜底底色：即使折射滤镜不可用，卡片也必须是看得见的玻璃，而不是透明块 */
 #win{position:absolute;left:9vw;top:50%;transform:translateY(-50%);width:min(336px,86vw);border-radius:28px;
   padding:20px 20px 22px;color:#fff;cursor:grab;user-select:none;touch-action:none;box-sizing:border-box;
   background:rgba(255,255,255,.10);
