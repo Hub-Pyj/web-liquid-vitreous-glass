@@ -1,5 +1,5 @@
 # Web Liquid Vitreous Glass
-## 若此版本不可用请退回至1.4.0 当前版本1.5.0
+
 液态玻璃JavaScript库：单文件、零依赖、无需构建，真实地**弯折**元素背后的内容，而不是只做一层模糊。
 
 MIT License · v1.5.0
@@ -12,6 +12,12 @@ web-liquid-vitreous-glass/
 └── LICENSE
 ```
 
+## 1.4.0和1.5.0两个版本都可用 更新内容：
+
+1. 版本1.5.0进行了改名，将**Vitreous Glass**改为了**Web Liquid Vitreous Glass**
+2. 包目录名与默认自定义元素标签由 **`vitreous-glass`** 改为 **`web-liquid-vitreous-glass`** 。
+3. 为避免旧版接入的页面失效，**`vitreous.js`** 在注册新标签时，仍会注册**旧的 `<vitreous-glass>`** 作为兼容别名，两套标签行为完全一致。
+4. **`VERSION`** 常量同步为 `1.5.0`。
 ---
 
 ## 1. 它做了什么
